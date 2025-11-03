@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/components/animatedfigure.tsx","./src/components/figureselector.tsx","./src/components/matrixdisplay.tsx","./src/components/scene3d.tsx","./src/components/transformpanel.tsx","./src/types/geometry.ts","./src/utils/figures.ts","./src/utils/matrices.ts"],"version":"5.9.3"}
