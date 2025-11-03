@@ -162,4 +162,5 @@ Proyecto educativo - Graficación por Computadora
 ## Desarrollado por:
 Garces Perez Alan Jesus
 Navarro Melo Cristian Eduardo
+Correa Silva Diego Domingo 
 
