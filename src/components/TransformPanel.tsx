@@ -135,7 +135,7 @@ export const TransformPanel = ({
             label={
               <Box>
                 <Typography variant="body2" fontWeight="bold">
-                  🎬 Animación de Transformaciones
+                   Animación de Transformaciones
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
                   {enableAnimation 

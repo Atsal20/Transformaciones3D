@@ -187,7 +187,7 @@ export const MatrixDisplay = ({ transformations }: MatrixDisplayProps) => {
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Typography variant="h6" color="primary">
-              📊 Matrices de Transformación
+               Matrices de Transformación
             </Typography>
             <Chip 
               label={transformations.length === 0 ? 'Identidad' : `${transformations.length} transformación${transformations.length > 1 ? 'es' : ''}`}
@@ -265,7 +265,7 @@ export const MatrixDisplay = ({ transformations }: MatrixDisplayProps) => {
               {/* Información adicional */}
               <Box sx={{ mt: 2, p: 2, bgcolor: '#e3f2fd', borderRadius: 1 }}>
                 <Typography variant="caption" color="primary">
-                  💡 <strong>Nota:</strong> Las matrices se multiplican de derecha a izquierda.
+                   <strong>Nota:</strong> Las matrices se multiplican de derecha a izquierda.
                   La primera transformación aplicada aparece a la derecha en la fórmula.
                 </Typography>
               </Box>

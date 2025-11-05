@@ -1,9 +1,9 @@
 // src/App.tsx
 
 import { useState } from 'react';
-import Grid from '@mui/material/GridLegacy';
 import {
   Container,
+  Grid,
   Paper,
   Typography,
   Box,
@@ -17,8 +17,10 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { Scene3D } from './components/Scene3D';
 import { FigureSelector } from './components/FigureSelector';
+import { CoordinateInput } from './components/CoordinateInput';
 import { TransformPanel } from './components/TransformPanel';
 import { MatrixDisplay } from './components/MatrixDisplay';
+import { VertexComparison } from './components/VertexComparison';
 import { FigureType, TransformationParams, Vector3D } from './types/geometry';
 import { createFigure } from './utils/figures';
 import {
@@ -45,6 +47,7 @@ const theme = createTheme({
 
 function App() {
   const [selectedFigure, setSelectedFigure] = useState<FigureType | null>(null);
+  const [userDefinedVertices, setUserDefinedVertices] = useState<Vector3D[]>([]);
   const [baseVertices, setBaseVertices] = useState<Vector3D[]>([]);
   const [transformedVertices, setTransformedVertices] = useState<Vector3D[]>([]);
   const [targetVertices, setTargetVertices] = useState<Vector3D[]>([]);
@@ -56,19 +59,52 @@ function App() {
   const [showAxes, setShowAxes] = useState(true);
   const [enableAnimation, setEnableAnimation] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [figureDrawn, setFigureDrawn] = useState(false);
+
+  const getSuggestedVertexCount = (figureType: FigureType): number => {
+    const counts: Record<FigureType, number> = {
+      [FigureType.CUBE]: 8,
+      [FigureType.TRIANGULAR_PYRAMID]: 4,
+      [FigureType.SQUARE_PYRAMID]: 5,
+      [FigureType.RHOMBUS]: 6,
+    };
+    return counts[figureType];
+  };
 
   const handleFigureChange = (figureType: FigureType) => {
     setSelectedFigure(figureType);
-    const figure = createFigure(figureType, 2);
-    
-    setBaseVertices(figure.vertices);
-    setTransformedVertices(figure.vertices);
-    setTargetVertices(figure.vertices);
-    setEdges(figure.edges);
-    setFaces(figure.faces);
+    setFigureDrawn(false);
+    setUserDefinedVertices([]);
+    setBaseVertices([]);
+    setTransformedVertices([]);
+    setTargetVertices([]);
     setTransformationMatrices([]);
     setTransformations([]);
     setIsAnimating(false);
+  };
+
+  const handleCoordinatesSubmit = (vertices: Vector3D[]) => {
+    // Guardar vértices definidos por el usuario
+    setUserDefinedVertices(vertices);
+    
+    // Usar los vértices del usuario para crear la figura
+    const figure = createFigure(selectedFigure!, 2);
+    
+    // Reemplazar vértices de la figura con los del usuario
+    const customFigure = {
+      ...figure,
+      vertices: vertices,
+    };
+    
+    setBaseVertices(vertices);
+    setTransformedVertices(vertices);
+    setTargetVertices(vertices);
+    setEdges(customFigure.edges);
+    setFaces(customFigure.faces);
+    setTransformationMatrices([]);
+    setTransformations([]);
+    setIsAnimating(false);
+    setFigureDrawn(true);
   };
 
   const handleApplyTransformation = (params: TransformationParams) => {
@@ -137,7 +173,7 @@ function App() {
         <AppBar position="static" elevation={2}>
           <Toolbar>
             <Typography variant="h5" component="div" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
-              🎨 Transformaciones 3D - Graficación por Computadora
+              Transformaciones 3D - Graficación por Computadora
             </Typography>
           </Toolbar>
         </AppBar>
@@ -153,25 +189,34 @@ function App() {
                   onFigureChange={handleFigureChange}
                 />
 
+                {/* Input de coordenadas */}
+                {selectedFigure && !figureDrawn && (
+                  <CoordinateInput
+                    figureType={selectedFigure}
+                    onCoordinatesSubmit={handleCoordinatesSubmit}
+                    suggestedVertexCount={getSuggestedVertexCount(selectedFigure)}
+                  />
+                )}
+
                 {/* Información */}
-                {selectedFigure && (
-                  <Paper elevation={3} sx={{ p: 2, bgcolor: 'info.light', color: 'white' }}>
+                {selectedFigure && figureDrawn && (
+                  <Paper elevation={3} sx={{ p: 2, bgcolor: 'success.light', color: 'white' }}>
                     <Typography variant="h6" gutterBottom>
-                      2. Visualizar Figura
+                       Figura Dibujada
                     </Typography>
                     <Typography variant="body2">
                       La figura se muestra en el canvas 3D. Usa el mouse para:
                     </Typography>
                     <Box component="ul" sx={{ mt: 1, pl: 2 }}>
-                      <li>🖱️ Click izquierdo + arrastrar: Rotar</li>
-                      <li>🖱️ Rueda del mouse: Zoom</li>
-                      <li>🖱️ Click derecho + arrastrar: Mover</li>
+                      <li> Click izquierdo + arrastrar: Rotar</li>
+                      <li> Rueda del mouse: Zoom</li>
+                      <li> Click derecho + arrastrar: Mover</li>
                     </Box>
                   </Paper>
                 )}
 
                 {/* Panel de transformaciones */}
-                {selectedFigure && (
+                {selectedFigure && figureDrawn && (
                   <TransformPanel
                     onApplyTransformation={handleApplyTransformation}
                     onResetTransformations={handleResetTransformations}
@@ -182,8 +227,16 @@ function App() {
                 )}
 
                 {/* Panel de matrices */}
-                {selectedFigure && (
+                {selectedFigure && figureDrawn && (
                   <MatrixDisplay transformations={transformations} />
+                )}
+
+                {/* Comparación de vértices */}
+                {selectedFigure && figureDrawn && transformations.length > 0 && (
+                  <VertexComparison
+                    originalVertices={userDefinedVertices}
+                    transformedVertices={transformedVertices}
+                  />
                 )}
               </Box>
             </Grid>
@@ -219,7 +272,7 @@ function App() {
 
                 <Divider sx={{ mb: 2 }} />
 
-                {selectedFigure ? (
+                {selectedFigure && figureDrawn ? (
                   <Scene3D
                     vertices={transformedVertices}
                     targetVertices={targetVertices}
@@ -240,11 +293,20 @@ function App() {
                       justifyContent: 'center',
                       bgcolor: '#e3f2fd',
                       borderRadius: 2,
+                      flexDirection: 'column',
+                      gap: 2,
                     }}
                   >
                     <Typography variant="h6" color="text.secondary">
-                      👈 Selecciona una figura para comenzar
+                      {selectedFigure 
+                        ? ' Ingresa las coordenadas de los vértices' 
+                        : ' Selecciona una figura para comenzar'}
                     </Typography>
+                    {selectedFigure && (
+                      <Typography variant="body2" color="text.secondary">
+                        Completa el formulario de coordenadas y haz click en "Aplicar"
+                      </Typography>
+                    )}
                   </Box>
                 )}
 
@@ -252,7 +314,7 @@ function App() {
                 {selectedFigure && transformedVertices.length > 0 && (
                   <Paper elevation={1} sx={{ mt: 2, p: 2, bgcolor: '#f5f5f5' }}>
                     <Typography variant="subtitle2" gutterBottom>
-                      📊 Información de la Figura
+                      Información de la Figura
                     </Typography>
                     <Grid container spacing={2}>
                       <Grid item xs={4}>
